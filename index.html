@@ -28,6 +28,10 @@ a {
   <body>
     <div id='root'></div>
     <script type='text/babel'>
+      const { Component } = React;
+      const { render } = ReactDOM;
+      const { Route, HashRouter, Link, Switch, Redirect, NavLink } = ReactRouterDOM;
+      const { createStore, combineReducers} = Redux;
 
       const connect = (Component)=> {
         class Connected extends React.Component{
@@ -42,6 +46,7 @@ a {
             this.unsubscribe = store.subscribe(() => this.setState(store.getState()));
           }
           render(){
+
             return (
               <Component {...this.state } {...this.props }/>
             );
@@ -49,6 +54,38 @@ a {
         }
         return Connected;
       }
+
+      const store = createStore(reducer)
+
+
+      const reducer = combineReducers({
+        event: (state=[], action)=>{
+          if(action.type === 'SET_EVENT'){
+            state = action.events;
+          }else if(action.type === 'ADD_EVENT'){
+            state = [...state, action.event]
+          }
+          // else if(action.type === 'DELETE_EVENT'){
+          //   state = action.events.filter((event, _id) => event.id !== _id)
+          // }
+
+          return state;
+        }
+      });
+
+      const fetchEvents = async ()=>{
+        store.dispatch({type: 'SET_EVENT', events: (await axios.get('/api/events')).data})
+      }
+
+      const addRandomEvent = async ()=> {
+        store.dispatch({type: 'ADD_EVENT', events: (await axios.post('/api/events')).data})
+      }
+
+      // const removeEvent = async ()=>{
+      //   store.dispatch({type: 'DELETE_EVENT', events: await axios.delete('/api/events/:id').filter((event, _id) => event.id !== _id)})
+      // }
+
+
 
       const Nav = connect(({ events }) => {
           return (
@@ -59,25 +96,32 @@ a {
           )
       })
 
-      const Home = connect()=> {
-          render () {
+
+
+
+      const Home = ()=> {
             return <h1> "Welcome to the page!" </h1>;
-          }
       }
 
-      const Events = connnect(({ events }) => {
+
+
+
+      const Events = connect(({ events }) => {
           return (
             <div>
                 <button onClick={ addRandomEvent }>Create</button>
                 <ul>
                     {
-                        events.map( event => <li key={ event.id }>{ event.name } { event.date }</li>)
-                    }    
+                        events.map( event => <Link onClick={removeEvent}><li key={ event.id }>{ event.name } { event.date }</li></Link>)
+                    }
                 </ul>
             </div>
           )
         })
-      }
+
+
+
+
 
       class App extends React.Component{
         componentDidMount(){
@@ -94,9 +138,33 @@ a {
             );
         }
     }
+// WEBPACK
+//npm i webpack webpack-cli --save-dev
+//in the package.json folder under start:
+//TYPE "webpack": "webpack --watch --mode=development"
+//then npm run webpack
+// need to create a src folder and an index.js
+//TYPE mkdir src/
+//TYPE touch src/index.js
+//CREATE webpack.config.js
+//TYPE npm i babel-loader --save-dev
+//TYPE npm i @babel/core --save-dev
+//got to the package.json folder after the first set of brakets type "babel": {"presets": ["@babel/react"]}
+//TYPE npm i @babel/preset-react --save-dev
+//now do npm run webpack
+//the folder dist/main.js will be created
+// go to the server.js and type
+//app.use('/dist', express.static(path.join(__dirname, 'dist')))
+//type this in the index.html <script src="/dist/main.js" defer><script> and delete type='babel/text'
+//go to the package.json and type under "webpack"
+//TYPE "start:dev" : "npm run webpack & nodemon server.js --ignore dist/ --ignore src/"
+//to run it type npm run start:dev
+// echo dest/ >> .gitignore
+//TYPE "postinstall" : "webpack" in the package.json folder so we can push to heroku
+
+
 
     ReactDOM.render(<App />, document.querySelector('#root'));
-      //ReactDOM.render(<App />, document.querySelector('#root'));
 
     </script>
   </body>
