@@ -65,10 +65,9 @@ a {
           }else if(action.type === 'ADD_EVENT'){
             state = [...state, action.event]
           }
-          // else if(action.type === 'DELETE_EVENT'){
-          //   state = action.events.filter((event, _id) => event.id !== _id)
-          // }
-
+          else if(action.type === 'DELETE_EVENT'){
+            state = action.events.filter((event, _id) => event.id !== _id)
+          }
           return state;
         }
       });
@@ -81,9 +80,9 @@ a {
         store.dispatch({type: 'ADD_EVENT', events: (await axios.post('/api/events')).data})
       }
 
-      // const removeEvent = async ()=>{
-      //   store.dispatch({type: 'DELETE_EVENT', events: await axios.delete('/api/events/:id').filter((event, _id) => event.id !== _id)})
-      // }
+      const removeEvent = async ()=>{
+        store.dispatch({type: 'DELETE_EVENT', events: await axios.delete('/api/events/:id').filter((event, _id) => event.id !== _id)})
+      }
 
 
 
